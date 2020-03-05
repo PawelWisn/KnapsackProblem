@@ -1,11 +1,12 @@
 from random import randint
 from math import floor
+import matplotlib.pyplot as plt
 
 
 class Individual:
     def __init__(self, genes_num=None, genes=None):
         if genes is None:
-            self.genes = [randint(0,1) for _ in range(genes_num)]
+            self.genes = [0 for _ in range(genes_num)]
         else:
             self.genes = genes
 
@@ -16,7 +17,7 @@ class Individual:
         for i in range(to_mutate_num):
             gene_idx = randint(0, genes_num - 1)
             while gene_idx in to_mutate:
-                gene_idx = gene_idx + 1 if gene_idx < genes_num-1 else 0
+                gene_idx = gene_idx + 1 if gene_idx < genes_num - 1 else 0
             to_mutate.append(gene_idx)
 
         for gene_idx in to_mutate:
@@ -27,13 +28,14 @@ class Population:
     def __init__(self, pop_size=0, genes_num=None):
         self.population = [Individual(genes_num) for _ in range(pop_size)]
 
-    def push_ind(self, ind):
+    def push_indiv(self, ind):
         self.population.append(ind)
 
     def best(self, task):
         fitnesses = [fitness(indiv, task) for indiv in self.population]
         index = fitnesses.index(max(fitnesses))
         return self.population[index]
+
 
 class Item:
     def __init__(self, w, s, c):
@@ -109,7 +111,7 @@ def fitness(individual, task):
             w_sum += item.w
             s_sum += item.s
             if w_sum > max_w or s_sum > max_s:
-                score = -1000
+                score = 0
                 break
     return score
 
@@ -120,7 +122,7 @@ def tournament(population, tourn_size, task):
     for i in range(tourn_size):
         candidate = randint(0, pop_size - 1)
         while candidate in participants:
-            candidate = candidate + 1 if candidate < pop_size-1 else 0
+            candidate = candidate + 1 if candidate < pop_size - 1 else 0
         participants.append(candidate)
 
     pop_slice = [population[participant] for participant in participants]
@@ -138,30 +140,35 @@ def crossover(parent1, parent2, rate):
     return Individual(genes=child_genes)
 
 
-
 if __name__ == '__main__':
     POP_SIZE = 1000
     TOURN_SIZE = 400
     CROSS_RATE = 0.4
-    MUT_RATE = 0.1
+    MUT_RATE = 0.01
+    ITERATIONS = 10
+    scores_per_gen = []
+
     generate_task(n=1001, w=10001, s=10001, output_file='task.csv')
     task = read_task(input_file='task.csv')
     pop = Population(pop_size=POP_SIZE, genes_num=task.n)
     i = 0
-    while i<100:
-        print('Generation:', i+1)
+    while i < ITERATIONS:
         new_pop = Population()
         j = 0
-        while j<POP_SIZE:
-            parent1 = tournament(pop.population,TOURN_SIZE, task)
-            parent2 = tournament(pop.population,TOURN_SIZE, task)
-            child = crossover(parent1,parent2,CROSS_RATE)
+        while j < POP_SIZE:
+            parent1 = tournament(pop.population, TOURN_SIZE, task)
+            parent2 = tournament(pop.population, TOURN_SIZE, task)
+            child = crossover(parent1, parent2, CROSS_RATE)
             child.mutate(MUT_RATE)
-            new_pop.push_ind(child)
-            j+=1
+            new_pop.push_indiv(child)
+            j += 1
         pop = new_pop
-        thebest = pop.best(task)
-        print(fitness(thebest, task), sum(thebest.genes),thebest.genes)
-        i+=1
-
-
+        best = pop.best(task)
+        scores_per_gen.append(fitness(best, task))
+        print('Generation: ', i + 1, ', fitness: ', fitness(best, task), ', ones: ', sum(best.genes), ', genes: ',
+              best.genes, sep='')
+        i += 1
+    plt.plot([x for x in range(1, ITERATIONS + 1)], scores_per_gen)
+    plt.xlabel('Generation')
+    plt.ylabel('Fitness')
+    plt.show()
