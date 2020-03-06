@@ -16,11 +16,11 @@ class Population:
     def get_by_idx(self, index):
         return self.population[index]
 
-    def gen_rand_pop(self, pop_size, genes_num):
+    def generate_rand_pop(self, pop_size, genes_num):
         self.pop_size = pop_size
         pop_temp = []
         for i in range(pop_size):
-            pop_temp.append([randint(0, 9) // 9 for _ in range(genes_num)])  # 90% for 0, 10% for 1
+            pop_temp.append([randint(0, 4) // 4 for _ in range(genes_num)])
         self.population = np.array(pop_temp)
 
     def calc_fitness(self, task):
@@ -47,7 +47,7 @@ class Population:
         return chosen_arr, np.array([self.fitness_arr[idx] for idx in chosen_arr])
 
     def best(self):
-        return self.population[self.fitness_arr.argmax()]
+        return self.population[self.fitness_arr.argmax()], self.fitness_arr.max(initial=0)
 
 
 class Item:
@@ -107,7 +107,7 @@ def read_task(input_file):
                 item = Item(int(w), int(s), int(c))
                 task.push_item(item)
     except FileNotFoundError:
-        print("\,!File not found!\n")
+        print("\n!File not found!\n")
     else:
         return task
 
@@ -121,51 +121,37 @@ def mutate(genes, rate):
     return genes
 
 
-def fitness(genes, task):
-    score = 0
-    w_sum = 0
-    s_sum = 0
-    for is_present, item in zip(list(genes), task.items):
-        if is_present:
-            score += item.c
-            w_sum += item.w
-            s_sum += item.s
-            if w_sum > task.w or s_sum > task.s:
-                score = 0
-                break
-    return score
-
-
 def tournament(population, tourn_size):
     indexes, fitness_arr = population.get_rand_pop_slice(tourn_size)
     best_idx = indexes[np.argmax(fitness_arr)]
     return population.get_by_idx(best_idx)
 
 
-def crossover(parent1, parent2, rate): # single point method
+def crossover(parent1, parent2, rate):  # single point method
     if randint(0, 1) / 100 > rate:
         return parent1
     cutting_point = len(parent1) // 3
     return list(parent1[:cutting_point]) + list(parent2[cutting_point:])
 
 
-if __name__ == '__main__':
-    POP_SIZE = 700
-    TOURN_SIZE = 600
-    CROSS_RATE = 0.4
-    MUT_RATE = 0.01
-    ITERATIONS = 250
+# generate_task(n=1001, w=10001, s=10001, output_file='task.csv')
+# task = read_task(input_file='task.csv')
+
+def knapsack(task, POP_SIZE=1000, TOURN_SIZE=500, CROSS_RATE=0.5, MUT_RATE=0.01, ITERATIONS=100):
     scores_per_gen = []
 
-    # generate_task(n=1001, w=10001, s=10001, output_file='task.csv')
-    task = read_task(input_file='task.csv')
     pop = Population()
-    pop.gen_rand_pop(POP_SIZE, task.n)
-    i = 0
+    pop.generate_rand_pop(POP_SIZE, task.n)
+    i = 1
     while i < ITERATIONS:
         new_pop = []
         j = 0
         pop.calc_fitness(task)
+
+        best, best_fit = pop.best()
+        scores_per_gen.append(best_fit)
+        print('Generation:', i, ', fitness:', best_fit)
+
         while j < POP_SIZE:
             parent1 = tournament(pop, TOURN_SIZE)
             parent2 = tournament(pop, TOURN_SIZE)
@@ -173,12 +159,53 @@ if __name__ == '__main__':
             child = mutate(child, MUT_RATE)
             new_pop.append(child)
             j += 1
-        best = pop.best()
         pop = Population(new_pop)
-        scores_per_gen.append(fitness(best, task))
-        print('Generation: ', i + 1, ', fitness: ', fitness(best, task), ', ones: ', sum(best), sep='')
         i += 1
-    plt.plot([x for x in range(1, ITERATIONS + 1)], scores_per_gen)
+
+    pop.calc_fitness(task)
+    best, best_fit = pop.best()
+    scores_per_gen.append(best_fit)
+    print('Generation:', i, ', fitness:', best_fit)
+    return best, scores_per_gen
+
+if __name__ == '__main__':
+    task = read_task('task.csv')
+
+    print("Analysis of the crossover probability:")
+    ITERATIONS=200
+    best_9, progress_9 = knapsack(task,CROSS_RATE=0.9, ITERATIONS=ITERATIONS)
+    best_6, progress_6 = knapsack(task,CROSS_RATE=0.6, ITERATIONS=ITERATIONS)
+    best_3, progress_3 = knapsack(task,CROSS_RATE=0.3, ITERATIONS=ITERATIONS)
+    best_1, progress_1 = knapsack(task,CROSS_RATE=0.1, ITERATIONS=ITERATIONS)
+
+    domain = [x for x in range(1, ITERATIONS + 1)]
+    plt.plot(domain, progress_9, label='0.9')
+    plt.plot(domain, progress_6, label='0.6')
+    plt.plot(domain, progress_3, label='0.3')
+    plt.plot(domain, progress_1, label='0.1')
+
     plt.xlabel('Generation')
     plt.ylabel('Fitness')
+    plt.legend()
+    plt.title('Comparison for different crossover probabilities')
     plt.show()
+
+    print("Analysis of the mutation probability:")
+    ITERATIONS = 200
+    best_1, progress_1     = knapsack(task, MUT_RATE=0.1, ITERATIONS=ITERATIONS)
+    best_01, progress_01   = knapsack(task, MUT_RATE=0.01, ITERATIONS=ITERATIONS)
+    best_005, progress_005 = knapsack(task, MUT_RATE=0.005, ITERATIONS=ITERATIONS)
+    best_001, progress_001 = knapsack(task, MUT_RATE=0.001, ITERATIONS=ITERATIONS)
+
+    domain = [x for x in range(1, ITERATIONS + 1)]
+    plt.plot(domain, progress_1, label='0.1')
+    plt.plot(domain, progress_01, label='0.01')
+    plt.plot(domain, progress_005, label='0.005')
+    plt.plot(domain, progress_001, label='0.001')
+
+    plt.xlabel('Generation')
+    plt.ylabel('Fitness')
+    plt.legend()
+    plt.title('Comparison for different mutation probabilities')
+    plt.show()
+
