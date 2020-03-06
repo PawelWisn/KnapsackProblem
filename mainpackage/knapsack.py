@@ -137,7 +137,7 @@ def crossover(parent1, parent2, rate):  # single point method
 # generate_task(n=1001, w=10001, s=10001, output_file='task.csv')
 # task = read_task(input_file='task.csv')
 
-def knapsack(task, POP_SIZE=1000, TOURN_SIZE=500, CROSS_RATE=0.5, MUT_RATE=0.01, ITERATIONS=100):
+def knapsack(task, POP_SIZE=1000, TOURN_SIZE=500, CROSS_RATE=0.5, MUT_RATE=0.001, ITERATIONS=100):
     scores_per_gen = []
 
     pop = Population()
@@ -166,46 +166,146 @@ def knapsack(task, POP_SIZE=1000, TOURN_SIZE=500, CROSS_RATE=0.5, MUT_RATE=0.01,
     best, best_fit = pop.best()
     scores_per_gen.append(best_fit)
     print('Generation:', i, ', fitness:', best_fit)
-    return best, scores_per_gen
+    return best, np.array(scores_per_gen)
+
+def greedySearch(task):
+    items = [(item.c, item.w, item.s) for item in task.items]
+    values_sorted = sorted(items, key=lambda x:x[0], reverse=True)
+    w_sum = 0
+    c_sum = 0
+    s_sum = 0
+    for item in values_sorted:
+        if w_sum>task.w or s_sum>task.s:
+            return s_sum
+        c_sum+=item[0]
+        w_sum+=item[1]
+        s_sum+=item[2]
+    return s_sum
+
+
+
+def crossoverTest(task, tests_num, cross_rates, iterations, **kwargs):
+    print("Analysis of the crossover probability:")
+    best_fit_arr = []
+    progress_fit_arr = [0 for _ in range(len(cross_rates))]
+    domain = [x for x in range(1, iterations + 1)]
+    fig, axs = plt.subplots(2, 1)
+    for test_num in range(tests_num):
+        i = 0
+        for cross_rate in cross_rates:
+            genes, fitness = knapsack(task, CROSS_RATE=cross_rate, ITERATIONS=iterations, **kwargs)
+            best_fit_arr[i] += fitness[-1] // tests_num
+            progress_fit_arr[i] += fitness // tests_num
+            if test_num == tests_num - 1:
+                axs[0].plot(domain, progress_fit_arr[i], label=str(cross_rates[i]))
+            i += 1
+
+    axs[0].set_xlabel('Generation')
+    axs[0].set_ylabel('Fitness')
+    axs[0].legend()
+
+    axs[1].set_xlabel('Crossover probability')
+    axs[1].set_ylabel('Final fitness')
+    axs[1].legend()
+    xaxis = [str(x) for x in cross_rates]
+    for i in range(tests_num):
+        axs[1].bar(xaxis, best_fit_arr, width=0.1, )
+    plt.show()
+
+
+def mutationTest(task, tests_num, mut_rates, iterations, **kwargs):
+    print("Analysis of the mutation probability:")
+    best_fit_arr = [0 for _ in range(len(mut_rates))]
+    progress_fit_arr = [0 for _ in range(len(mut_rates))]
+    domain = [x for x in range(1, iterations + 1)]
+    fig, axs = plt.subplots(2, 1)
+    for test_num in range(tests_num):
+        i = 0
+        for mut_rate in mut_rates:
+            genes, fitness = knapsack(task, MUT_RATE=mut_rate, ITERATIONS=iterations, **kwargs)
+            best_fit_arr[i] += fitness[-1] // tests_num
+            progress_fit_arr[i] += fitness // tests_num
+            if test_num == tests_num - 1:
+                axs[0].plot(domain, progress_fit_arr[i], label=str(mut_rates[i]))
+            i += 1
+
+    axs[0].set_xlabel('Generation')
+    axs[0].set_ylabel('Fitness')
+    axs[0].legend()
+
+    axs[1].set_xlabel('Mutation probability')
+    axs[1].set_ylabel('Final fitness')
+    axs[1].legend()
+    xaxis = [str(x) for x in mut_rates]
+    for i in range(tests_num):
+        axs[1].bar(xaxis, best_fit_arr, width=0.1)
+    plt.show()
+
+
+def tournamentTest(task, tests_num, tourn_sizes, iterations, **kwargs):
+    print("Analysis of the tournament size:")
+    best_fit_arr = [0 for _ in range(len(tourn_sizes))]
+    progress_fit_arr = [0 for _ in range(len(tourn_sizes))]
+    domain = [x for x in range(1, iterations + 1)]
+    fig, axs = plt.subplots(2, 1)
+    for test_num in range(tests_num):
+        i = 0
+        for tourn_size in tourn_sizes:
+            genes, fitness = knapsack(task, TOURN_SIZE=tourn_size, ITERATIONS=iterations, **kwargs)
+            best_fit_arr[i] += fitness[-1] // tests_num
+            progress_fit_arr[i] += fitness // tests_num
+            if test_num == tests_num - 1:
+                axs[0].plot(domain, progress_fit_arr[i], label=str(tourn_sizes[i]))
+            i += 1
+
+    axs[0].set_xlabel('Generation')
+    axs[0].set_ylabel('Fitness')
+    axs[0].legend()
+
+    axs[1].set_xlabel('Tournament size')
+    axs[1].set_ylabel('Final fitness')
+    axs[1].legend()
+    xaxis = [str(x) for x in tourn_sizes]
+    for i in range(tests_num):
+        axs[1].bar(xaxis, best_fit_arr, width=0.1)
+    plt.show()
+
+
+
+
+def populationTest(task, tests_num, pop_sizes, iterations, **kwargs):
+    print("Analysis of the population size:")
+    best_fit_arr = [0 for _ in range(len(pop_sizes))]
+    progress_fit_arr = [0 for _ in range(len(pop_sizes))]
+    domain = [x for x in range(1, iterations + 1)]
+    fig, axs = plt.subplots(2, 1)
+    for test_num in range(tests_num):
+        i = 0
+        for pop_size in pop_sizes:
+            genes, fitness = knapsack(task, POP_SIZE=pop_size, ITERATIONS=iterations, **kwargs)
+            best_fit_arr[i] += fitness[-1] // tests_num
+            progress_fit_arr[i] += fitness // tests_num
+            if test_num == tests_num - 1:
+                axs[0].plot(domain, progress_fit_arr[i], label=str(pop_sizes[i]))
+            i += 1
+
+    axs[0].set_xlabel('Generation')
+    axs[0].set_ylabel('Fitness')
+    axs[0].legend()
+
+    axs[1].set_xlabel('Population size')
+    axs[1].set_ylabel('Final fitness')
+    axs[1].legend()
+    xaxis = [str(x) for x in pop_sizes]
+    for i in range(tests_num):
+        axs[1].bar(xaxis, best_fit_arr, width=0.1)
+    plt.show()
+
 
 if __name__ == '__main__':
     task = read_task('task.csv')
-
-    print("Analysis of the crossover probability:")
-    ITERATIONS=200
-    best_9, progress_9 = knapsack(task,CROSS_RATE=0.9, ITERATIONS=ITERATIONS)
-    best_6, progress_6 = knapsack(task,CROSS_RATE=0.6, ITERATIONS=ITERATIONS)
-    best_3, progress_3 = knapsack(task,CROSS_RATE=0.3, ITERATIONS=ITERATIONS)
-    best_1, progress_1 = knapsack(task,CROSS_RATE=0.1, ITERATIONS=ITERATIONS)
-
-    domain = [x for x in range(1, ITERATIONS + 1)]
-    plt.plot(domain, progress_9, label='0.9')
-    plt.plot(domain, progress_6, label='0.6')
-    plt.plot(domain, progress_3, label='0.3')
-    plt.plot(domain, progress_1, label='0.1')
-
-    plt.xlabel('Generation')
-    plt.ylabel('Fitness')
-    plt.legend()
-    plt.title('Comparison for different crossover probabilities')
-    plt.show()
-
-    print("Analysis of the mutation probability:")
-    ITERATIONS = 200
-    best_1, progress_1     = knapsack(task, MUT_RATE=0.1, ITERATIONS=ITERATIONS)
-    best_01, progress_01   = knapsack(task, MUT_RATE=0.01, ITERATIONS=ITERATIONS)
-    best_005, progress_005 = knapsack(task, MUT_RATE=0.005, ITERATIONS=ITERATIONS)
-    best_001, progress_001 = knapsack(task, MUT_RATE=0.001, ITERATIONS=ITERATIONS)
-
-    domain = [x for x in range(1, ITERATIONS + 1)]
-    plt.plot(domain, progress_1, label='0.1')
-    plt.plot(domain, progress_01, label='0.01')
-    plt.plot(domain, progress_005, label='0.005')
-    plt.plot(domain, progress_001, label='0.001')
-
-    plt.xlabel('Generation')
-    plt.ylabel('Fitness')
-    plt.legend()
-    plt.title('Comparison for different mutation probabilities')
-    plt.show()
-
+    print('greedySearch:', greedySearch(task))
+    crossoverTest(task, tests_num=5, cross_rates=[0.7, 0.4, 0.1], iterations=500)
+    mutationTest(task, tests_num=5, mut_rates=[0.02, 0.005, 0.001], iterations=500)
+    tournamentTest(task, tests_num=5, tourn_sizes=[100, 500, 900], iterations=500)
+    populationTest(task, tests_num=5, pop_sizes=[1000,1500,2000], iterations=500)
