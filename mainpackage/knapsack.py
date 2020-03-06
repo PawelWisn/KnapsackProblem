@@ -90,7 +90,6 @@ def generate_task(n, w, s, output_file):
             s_arr.append(si)
 
             c_arr.append(randint(1, n - 1))
-
     with open(output_file, 'w') as f:
         f.write(f'{n},{w},{s}\n')
         for i in range(n):
@@ -150,7 +149,7 @@ def knapsack(task, POP_SIZE=1000, TOURN_SIZE=500, CROSS_RATE=0.5, MUT_RATE=0.001
 
         best, best_fit = pop.best()
         scores_per_gen.append(best_fit)
-        print('Generation:', i, ', fitness:', best_fit)
+        #print('Generation:', i, ', fitness:', best_fit)
 
         while j < POP_SIZE:
             parent1 = tournament(pop, TOURN_SIZE)
@@ -165,7 +164,7 @@ def knapsack(task, POP_SIZE=1000, TOURN_SIZE=500, CROSS_RATE=0.5, MUT_RATE=0.001
     pop.calc_fitness(task)
     best, best_fit = pop.best()
     scores_per_gen.append(best_fit)
-    print('Generation:', i, ', fitness:', best_fit)
+    #print('Generation:', i, ', fitness:', best_fit)
     return best, np.array(scores_per_gen)
 
 def greedySearch(task):
@@ -176,7 +175,7 @@ def greedySearch(task):
     s_sum = 0
     for item in values_sorted:
         if w_sum>task.w or s_sum>task.s:
-            return s_sum
+            break
         c_sum+=item[0]
         w_sum+=item[1]
         s_sum+=item[2]
@@ -186,10 +185,11 @@ def greedySearch(task):
 
 def crossoverTest(task, tests_num, cross_rates, iterations, **kwargs):
     print("Analysis of the crossover probability:")
-    best_fit_arr = []
+    best_fit_arr = [0 for _ in range(len(cross_rates))]
     progress_fit_arr = [0 for _ in range(len(cross_rates))]
     domain = [x for x in range(1, iterations + 1)]
-    fig, axs = plt.subplots(2, 1)
+    fig, axs = plt.subplots(2, 1, gridspec_kw={'height_ratios': [2,1]},figsize=[10,10])
+    fig.suptitle('The impact of the crossover probability on the results')
     for test_num in range(tests_num):
         i = 0
         for cross_rate in cross_rates:
@@ -206,11 +206,11 @@ def crossoverTest(task, tests_num, cross_rates, iterations, **kwargs):
 
     axs[1].set_xlabel('Crossover probability')
     axs[1].set_ylabel('Final fitness')
-    axs[1].legend()
     xaxis = [str(x) for x in cross_rates]
     for i in range(tests_num):
-        axs[1].bar(xaxis, best_fit_arr, width=0.1, )
-    plt.show()
+        axs[1].bar(xaxis, best_fit_arr, width=0.1)
+    #plt.show()
+    plt.savefig('crossover.png')
 
 
 def mutationTest(task, tests_num, mut_rates, iterations, **kwargs):
@@ -218,7 +218,8 @@ def mutationTest(task, tests_num, mut_rates, iterations, **kwargs):
     best_fit_arr = [0 for _ in range(len(mut_rates))]
     progress_fit_arr = [0 for _ in range(len(mut_rates))]
     domain = [x for x in range(1, iterations + 1)]
-    fig, axs = plt.subplots(2, 1)
+    fig, axs = plt.subplots(2, 1, gridspec_kw={'height_ratios': [2,1]},figsize=[10,10])
+    fig.suptitle('The impact of the mutation probability on the results')
     for test_num in range(tests_num):
         i = 0
         for mut_rate in mut_rates:
@@ -235,19 +236,19 @@ def mutationTest(task, tests_num, mut_rates, iterations, **kwargs):
 
     axs[1].set_xlabel('Mutation probability')
     axs[1].set_ylabel('Final fitness')
-    axs[1].legend()
     xaxis = [str(x) for x in mut_rates]
     for i in range(tests_num):
         axs[1].bar(xaxis, best_fit_arr, width=0.1)
-    plt.show()
-
+    # plt.show()
+    plt.savefig('mutation.png')
 
 def tournamentTest(task, tests_num, tourn_sizes, iterations, **kwargs):
     print("Analysis of the tournament size:")
     best_fit_arr = [0 for _ in range(len(tourn_sizes))]
     progress_fit_arr = [0 for _ in range(len(tourn_sizes))]
     domain = [x for x in range(1, iterations + 1)]
-    fig, axs = plt.subplots(2, 1)
+    fig, axs = plt.subplots(2, 1, gridspec_kw={'height_ratios': [2,1]},figsize=[10,10])
+    fig.suptitle('The impact of the tournament size on the results')
     for test_num in range(tests_num):
         i = 0
         for tourn_size in tourn_sizes:
@@ -264,11 +265,10 @@ def tournamentTest(task, tests_num, tourn_sizes, iterations, **kwargs):
 
     axs[1].set_xlabel('Tournament size')
     axs[1].set_ylabel('Final fitness')
-    axs[1].legend()
     xaxis = [str(x) for x in tourn_sizes]
     for i in range(tests_num):
         axs[1].bar(xaxis, best_fit_arr, width=0.1)
-    plt.show()
+    plt.savefig('tournament.png')
 
 
 
@@ -278,7 +278,8 @@ def populationTest(task, tests_num, pop_sizes, iterations, **kwargs):
     best_fit_arr = [0 for _ in range(len(pop_sizes))]
     progress_fit_arr = [0 for _ in range(len(pop_sizes))]
     domain = [x for x in range(1, iterations + 1)]
-    fig, axs = plt.subplots(2, 1)
+    fig, axs = plt.subplots(2, 1, gridspec_kw={'height_ratios': [2,1]},figsize=[10,10])
+    fig.suptitle('The impact of the population size on the results')
     for test_num in range(tests_num):
         i = 0
         for pop_size in pop_sizes:
@@ -295,17 +296,21 @@ def populationTest(task, tests_num, pop_sizes, iterations, **kwargs):
 
     axs[1].set_xlabel('Population size')
     axs[1].set_ylabel('Final fitness')
-    axs[1].legend()
     xaxis = [str(x) for x in pop_sizes]
     for i in range(tests_num):
         axs[1].bar(xaxis, best_fit_arr, width=0.1)
-    plt.show()
-
+    # plt.show()
+    plt.savefig('population.png')
 
 if __name__ == '__main__':
+    generate_task(1001,10001,10001, 'task.csv')
     task = read_task('task.csv')
     print('greedySearch:', greedySearch(task))
-    crossoverTest(task, tests_num=5, cross_rates=[0.7, 0.4, 0.1], iterations=500)
-    mutationTest(task, tests_num=5, mut_rates=[0.02, 0.005, 0.001], iterations=500)
-    tournamentTest(task, tests_num=5, tourn_sizes=[100, 500, 900], iterations=500)
-    populationTest(task, tests_num=5, pop_sizes=[1000,1500,2000], iterations=500)
+    crossoverTest(task, tests_num=1, cross_rates=[0.7, 0.4, 0.1], iterations=500)
+    print('Crossover test finished')
+    mutationTest(task, tests_num=1, mut_rates=[0.02, 0.005, 0.001], iterations=500)
+    print('Mutation test finished')
+    tournamentTest(task, tests_num=1, tourn_sizes=[100, 500, 900], iterations=500)
+    print('Tournament test finished')
+    populationTest(task, tests_num=1, pop_sizes=[1000,1500,2000], iterations=500)
+    print('Population test finished')
