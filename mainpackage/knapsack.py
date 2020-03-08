@@ -2,6 +2,13 @@ from random import randint
 from math import floor
 import matplotlib.pyplot as plt
 import numpy as np
+import multiprocessing as mp
+
+
+def matmul(args):
+    pop = args[0]
+    mat = args[1]
+    return pop @ np.transpose(mat)
 
 
 class Population:
@@ -23,6 +30,7 @@ class Population:
             pop_temp.append([randint(0, 4) // 4 for _ in range(genes_num)])
         self.population = np.array(pop_temp)
 
+
     def calc_fitness(self, task):
         fitness_temp = []
 
@@ -33,6 +41,9 @@ class Population:
         sum_weights = self.population @ np.transpose(weights)
         sum_sizes = self.population @ np.transpose(sizes)
         sum_values = self.population @ np.transpose(values)
+        # pop = self.population
+        # p = mp.Pool(5)
+        # sum_weights, sum_sizes, sum_values = p.map(matmul, [(pop,weights), (pop,sizes), (pop,values)])
 
         for i in range(self.pop_size):
             if sum_sizes[i] > task.s or sum_weights[i] > task.w:
@@ -136,7 +147,7 @@ def crossover(parent1, parent2, rate):  # single point method
 # generate_task(n=1001, w=10001, s=10001, output_file='task.csv')
 # task = read_task(input_file='task.csv')
 
-def knapsack(task, POP_SIZE=1000, TOURN_SIZE=500, CROSS_RATE=0.5, MUT_RATE=0.001, ITERATIONS=100):
+def knapsack(task, POP_SIZE=1000, TOURN_SIZE=300, CROSS_RATE=0.5, MUT_RATE=0.001, ITERATIONS=100):
     scores_per_gen = []
 
     pop = Population()
@@ -149,7 +160,7 @@ def knapsack(task, POP_SIZE=1000, TOURN_SIZE=500, CROSS_RATE=0.5, MUT_RATE=0.001
 
         best, best_fit = pop.best()
         scores_per_gen.append(best_fit)
-        #print('Generation:', i, ', fitness:', best_fit)
+        print('Generation:', i, ', fitness:', best_fit)
 
         while j < POP_SIZE:
             parent1 = tournament(pop, TOURN_SIZE)
@@ -164,7 +175,7 @@ def knapsack(task, POP_SIZE=1000, TOURN_SIZE=500, CROSS_RATE=0.5, MUT_RATE=0.001
     pop.calc_fitness(task)
     best, best_fit = pop.best()
     scores_per_gen.append(best_fit)
-    #print('Generation:', i, ', fitness:', best_fit)
+    print('Generation:', i, ', fitness:', best_fit)
     return best, np.array(scores_per_gen)
 
 def greedySearch(task):
@@ -303,14 +314,14 @@ def populationTest(task, tests_num, pop_sizes, iterations, **kwargs):
     plt.savefig('population.png')
 
 if __name__ == '__main__':
-    generate_task(1001,10001,10001, 'task.csv')
+    # generate_task(1001,10001,10001, 'task.csv')
     task = read_task('task.csv')
-    print('greedySearch:', greedySearch(task))
-    crossoverTest(task, tests_num=1, cross_rates=[0.7, 0.4, 0.1], iterations=500)
-    print('Crossover test finished')
-    mutationTest(task, tests_num=1, mut_rates=[0.02, 0.005, 0.001], iterations=500)
-    print('Mutation test finished')
-    tournamentTest(task, tests_num=1, tourn_sizes=[100, 500, 900], iterations=500)
-    print('Tournament test finished')
-    populationTest(task, tests_num=1, pop_sizes=[1000,1500,2000], iterations=500)
+    # print('greedySearch:', greedySearch(task))
+    # crossoverTest(task, tests_num=5, cross_rates=[0.9, 0.5, 0.1], iterations=600)
+    # print('Crossover test finished')
+    # mutationTest(task, tests_num=5, mut_rates=[0.01, 0.005, 0.001], iterations=600)
+    # print('Mutation test finished')
+    # tournamentTest(task, tests_num=5, tourn_sizes=[100, 500, 900], iterations=600)
+    # print('Tournament test finished')
+    populationTest(task, tests_num=5, pop_sizes=[1000,1500,2000], iterations=600)
     print('Population test finished')
