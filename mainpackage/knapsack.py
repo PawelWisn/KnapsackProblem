@@ -323,5 +323,5 @@ if __name__ == '__main__':
     # print('Mutation test finished')
     # tournamentTest(task, tests_num=5, tourn_sizes=[100, 500, 900], iterations=600)
     # print('Tournament test finished')
-    populationTest(task, tests_num=5, pop_sizes=[1000,1500,2000], iterations=600)
+    populationTest(task, tests_num=1, pop_sizes=[1000,3500,6000], iterations=600)
     print('Population test finished')
