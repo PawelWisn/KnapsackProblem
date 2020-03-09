@@ -311,7 +311,7 @@ def populationTest(task, tests_num, pop_sizes, iterations, **kwargs):
     for i in range(tests_num):
         axs[1].bar(xaxis, best_fit_arr, width=0.1)
     # plt.show()
-    plt.savefig('population.png')
+    plt.savefig('population2.png')
 
 if __name__ == '__main__':
     # generate_task(1001,10001,10001, 'task.csv')
