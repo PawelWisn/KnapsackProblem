@@ -4,11 +4,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import multiprocessing as mp
 
-
-def matmul(args):
-    pop = args[0]
-    mat = args[1]
-    return pop @ np.transpose(mat)
+# def matmul(args):
+#     pop = args[0]
+#     mat = args[1]
+#     return pop @ np.transpose(mat)
 
 
 class Population:
@@ -19,6 +18,7 @@ class Population:
         else:
             self.population = np.array(indivs)
             self.pop_size = self.population.shape[0]
+            self.indexesArr = [ind for ind in range(len(indivs))]
 
     def get_by_idx(self, index):
         return self.population[index]
@@ -29,6 +29,7 @@ class Population:
         for i in range(pop_size):
             pop_temp.append([randint(0, 4) // 4 for _ in range(genes_num)])
         self.population = np.array(pop_temp)
+        self.indexesArr = [ind for ind in range(pop_size)]
 
 
     def calc_fitness(self, task):
@@ -54,8 +55,8 @@ class Population:
         self.fitness_arr = np.array(fitness_temp)
 
     def get_rand_pop_slice(self, slice_size):
-        chosen_arr = np.random.choice([x for x in range(self.pop_size)], size=slice_size, replace=False)
-        return chosen_arr, np.array([self.fitness_arr[idx] for idx in chosen_arr])
+        chosen_arr = np.random.choice(self.indexesArr, size=slice_size, replace=True)
+        return chosen_arr, list(map(lambda idx: self.fitness_arr[idx], chosen_arr))
 
     def best(self):
         return self.population[self.fitness_arr.argmax()], self.fitness_arr.max(initial=0)
@@ -125,7 +126,7 @@ def read_task(input_file):
 def mutate(genes, rate):
     genes_num = len(genes)
     to_mutate_num = floor(genes_num * rate)
-    to_mutate = np.random.choice([x for x in range(genes_num)], size=to_mutate_num, replace=False)
+    to_mutate = np.random.choice([x for x in range(genes_num)], size=to_mutate_num, replace=True)
     for gene_idx in to_mutate:
         genes[gene_idx] = int(not genes[gene_idx])
     return genes
@@ -147,7 +148,7 @@ def crossover(parent1, parent2, rate):  # single point method
 # generate_task(n=1001, w=10001, s=10001, output_file='task.csv')
 # task = read_task(input_file='task.csv')
 
-def knapsack(task, POP_SIZE=1000, TOURN_SIZE=300, CROSS_RATE=0.5, MUT_RATE=0.001, ITERATIONS=100):
+def knapsack(task, POP_SIZE=1000, TOURN_SIZE=100, CROSS_RATE=0.5, MUT_RATE=0.001, ITERATIONS=100):
     scores_per_gen = []
 
     pop = Population()
@@ -319,9 +320,9 @@ if __name__ == '__main__':
     # print('greedySearch:', greedySearch(task))
     # crossoverTest(task, tests_num=5, cross_rates=[0.9, 0.5, 0.1], iterations=600)
     # print('Crossover test finished')
-    # mutationTest(task, tests_num=5, mut_rates=[0.01, 0.005, 0.001], iterations=600)
-    # print('Mutation test finished')
+    mutationTest(task, tests_num=1, mut_rates=[0.001], iterations=50)
+    print('Mutation test finished')
     # tournamentTest(task, tests_num=5, tourn_sizes=[100, 500, 900], iterations=600)
     # print('Tournament test finished')
-    populationTest(task, tests_num=1, pop_sizes=[1000,3500,6000], iterations=600)
-    print('Population test finished')
+    # populationTest(task, tests_num=1, pop_sizes=[1000,3500,6000], iterations=600)
+    # print('Population test finished')
