@@ -55,7 +55,7 @@ class Population:
         self.fitness_arr = np.array(fitness_temp)
 
     def get_rand_pop_slice(self, slice_size):
-        chosen_arr = np.random.choice(self.indexesArr, size=slice_size, replace=True)
+        chosen_arr = np.random.randint(self.pop_size, size=slice_size)
         return chosen_arr, list(map(lambda idx: self.fitness_arr[idx], chosen_arr))
 
     def best(self):
@@ -126,7 +126,7 @@ def read_task(input_file):
 def mutate(genes, rate):
     genes_num = len(genes)
     to_mutate_num = floor(genes_num * rate)
-    to_mutate = np.random.choice([x for x in range(genes_num)], size=to_mutate_num, replace=True)
+    to_mutate = np.random.randint(genes_num, size=to_mutate_num)
     for gene_idx in to_mutate:
         genes[gene_idx] = int(not genes[gene_idx])
     return genes
@@ -148,7 +148,7 @@ def crossover(parent1, parent2, rate):  # single point method
 # generate_task(n=1001, w=10001, s=10001, output_file='task.csv')
 # task = read_task(input_file='task.csv')
 
-def knapsack(task, POP_SIZE=1000, TOURN_SIZE=100, CROSS_RATE=0.5, MUT_RATE=0.001, ITERATIONS=100):
+def knapsack(task, POP_SIZE=100, TOURN_SIZE=10, CROSS_RATE=0.5, MUT_RATE=0.001, ITERATIONS=100):
     scores_per_gen = []
 
     pop = Population()
@@ -320,7 +320,7 @@ if __name__ == '__main__':
     # print('greedySearch:', greedySearch(task))
     # crossoverTest(task, tests_num=5, cross_rates=[0.9, 0.5, 0.1], iterations=600)
     # print('Crossover test finished')
-    mutationTest(task, tests_num=1, mut_rates=[0.001], iterations=50)
+    mutationTest(task, tests_num=1, mut_rates=[0.005, 0.002, 0.001], iterations=1000)
     print('Mutation test finished')
     # tournamentTest(task, tests_num=5, tourn_sizes=[100, 500, 900], iterations=600)
     # print('Tournament test finished')
