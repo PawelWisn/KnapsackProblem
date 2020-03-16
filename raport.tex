@@ -166,6 +166,9 @@ Experience has shown a large impact of the tournament size on the final result. 
 	\includegraphics[scale=0.5]{greedy}
 \end{center}
 
-An example of a non-evolutionary solution to the knapsack problem can be a greedy algorithm that selects the most valuable items until the total weight and size of the items do not exceed the maximum values.
+An example of a non-evolutionary solution to a knapsack problem can be a greedy algorithm that selects items with the highest ratio of value to the sum of weight and size, until the total weight and size of the items do not exceed the maximum values.
 
+\includegraphics[scale=0.55]{greedy_vs_genetic}
+
+The greedy algorithm turned out to be more effective than I expected. It achieved results close to those obtained by the genetic algorithm. The function is performed almost immediately, which can not be said about the evolutionary method, which performs much more calculations. However, since the goal of the task was to maximize the value of items in the backpack, the victory must be granted to the genetic algorithm.
 \end{document}

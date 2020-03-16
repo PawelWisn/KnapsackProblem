@@ -49,8 +49,6 @@ class Population:
 
         self.fitness_arr = np.array(fitness_temp)
 
-
-
     def best(self):
         return self.population[self.fitness_arr.argmax()], self.fitness_arr.max(initial=0)
 
@@ -166,33 +164,33 @@ def knapsack(task, POP_SIZE=1000, TOURN_SIZE=200, CROSS_RATE=0.5, MUT_RATE=0.001
     return best, np.array(scores_per_gen)
 
 
-# def greedySearch(task):
-#     items = [(item.c, item.w, item.s) for item in task.items]
-#     values_sorted = sorted(items, key=lambda x: x[0], reverse=True)
-#     w_sum = c_sum = s_sum = 0
-#     for item in values_sorted:
-#         if w_sum > task.w or s_sum > task.s:
-#             break
-#         c_sum += item[0]
-#         w_sum += item[1]
-#         s_sum += item[2]
-#     return s_sum
 def greedySearch(task):
-    items = [(item.c, item.w, item.s) for item in task.items]
+    items = [(item.c / (item.w + item.s), item.c, item.w, item.s) for item in task.items]
     values_sorted = sorted(items, key=lambda x: x[0], reverse=True)
     w_sum = c_sum = s_sum = 0
     for item in values_sorted:
+        print(item)
         if w_sum > task.w or s_sum > task.s:
             break
-        c_sum += item[0]
-        w_sum += item[1]
-        s_sum += item[2]
-    return s_sum
+        c_sum += item[1]
+        w_sum += item[2]
+        s_sum += item[3]
+    return c_sum
 
-def evol_vs_nonevol(task, nonevol, **evol_kwargs):
-    nonevol = nonevol(task)
-    evol = knapsack(task, **evol_kwargs)[1][-1]
-    plt.bar(['Greedy Search', 'Genetic Alg'],[nonevol,evol])
+
+def evol_vs_nonevol(tests_num, nonevol, **evol_kwargs):
+    nonevol_fit = 0
+    evol_fit = 0
+    for i in range(tests_num):
+        generate_task(1001, 10001, 10001, 'task.csv')
+        task = read_task('task.csv')
+        nonevol_fit += nonevol(task) // tests_num
+        evol_fit += knapsack(task, **evol_kwargs)[1][-1] // tests_num
+
+    print("Greedy fitness:", nonevol_fit)
+    print("Genetic fitness:", evol_fit)
+    plt.bar(['Greedy Search', 'Genetic Algorithm'], [nonevol_fit, evol_fit])
+    plt.ylabel("Fitness")
     plt.show()
 
 
@@ -328,5 +326,5 @@ if __name__ == '__main__':
     # populationTest(task, tests_num=3, pop_sizes=[100, 500, 1000], iterations=700)
     # print('Population test finished')
     # the best: pop_size=6000, tourn=100, cross=0.9, mut_rate=0.001
-    evol_vs_nonevol(task, greedySearch, POP_SIZE=100, TOURN_SIZE=20)
+    evol_vs_nonevol(1, greedySearch, POP_SIZE=100, TOURN_SIZE=20, CROSS_RATE=0.9, ITERATIONS=800)
     print('nonevol vs evol comparison finished')
