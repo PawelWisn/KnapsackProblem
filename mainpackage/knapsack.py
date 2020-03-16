@@ -166,6 +166,17 @@ def knapsack(task, POP_SIZE=1000, TOURN_SIZE=200, CROSS_RATE=0.5, MUT_RATE=0.001
     return best, np.array(scores_per_gen)
 
 
+# def greedySearch(task):
+#     items = [(item.c, item.w, item.s) for item in task.items]
+#     values_sorted = sorted(items, key=lambda x: x[0], reverse=True)
+#     w_sum = c_sum = s_sum = 0
+#     for item in values_sorted:
+#         if w_sum > task.w or s_sum > task.s:
+#             break
+#         c_sum += item[0]
+#         w_sum += item[1]
+#         s_sum += item[2]
+#     return s_sum
 def greedySearch(task):
     items = [(item.c, item.w, item.s) for item in task.items]
     values_sorted = sorted(items, key=lambda x: x[0], reverse=True)
@@ -177,6 +188,12 @@ def greedySearch(task):
         w_sum += item[1]
         s_sum += item[2]
     return s_sum
+
+def evol_vs_nonevol(task, nonevol, **evol_kwargs):
+    nonevol = nonevol(task)
+    evol = knapsack(task, **evol_kwargs)[1][-1]
+    plt.bar(['Greedy Search', 'Genetic Alg'],[nonevol,evol])
+    plt.show()
 
 
 def crossoverTest(task, tests_num, cross_rates, iterations, **kwargs):
@@ -301,12 +318,15 @@ def populationTest(task, tests_num, pop_sizes, iterations, **kwargs):
 if __name__ == '__main__':
     generate_task(1001, 10001, 10001, 'task.csv')
     task = read_task('task.csv')
-    # print('greedySearch:', greedySearch(task))
-    crossoverTest(task, tests_num=1, cross_rates=[0.9, 0.5, 0.1], iterations=250)
-    print('Crossover test finished')
+
+    # crossoverTest(task, tests_num=1, cross_rates=[0.9, 0.5, 0.1],POP_SIZE=100,TOURN_SIZE=20, iterations=700)
+    # print('Crossover test finished')
     # mutationTest(task, tests_num=3, mut_rates=[0.005, 0.002, 0.001], iterations=700)
     # print('Mutation test finished')
     # tournamentTest(task, tests_num=3, tourn_sizes=[10, 50, 90], iterations=700)
     # print('Tournament test finished')
     # populationTest(task, tests_num=3, pop_sizes=[100, 500, 1000], iterations=700)
     # print('Population test finished')
+    # the best: pop_size=6000, tourn=100, cross=0.9, mut_rate=0.001
+    evol_vs_nonevol(task, greedySearch, POP_SIZE=100, TOURN_SIZE=20)
+    print('nonevol vs evol comparison finished')

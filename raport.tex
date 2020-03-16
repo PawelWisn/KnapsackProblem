@@ -119,7 +119,7 @@ In the beginning a real number from the range [0, 1] is drawn. If that number is
 
 The function selects random genes from an individual and converts their values to the opposite, then returns the mutated individual.
 
-\subsection{Mutation Function}
+\subsection{Knapsack Function}
 \begin{center}
 	\includegraphics[scale=0.5]{knapsack}
 \end{center}
@@ -154,5 +154,18 @@ The values obtained for population sizes 3500 and 6000 are almost identical, the
 \includegraphics[scale=0.55]{crossover}
 
 The best value of the parameter turned out to be 0.9, however, the impact of this parameter does not seem to have a key impact on the algorithm's efficiency.
+
+\subsection{The impact of the tournament size}
+\hspace*{-1.5cm}
+\includegraphics[scale=0.55]{tournament}
+
+Experience has shown a large impact of the tournament size on the final result. Too large sizes blocked the population at the local maximums, which is why the results obtained are far from satisfactory. Meanwhile, the smallest parameter, by giving the chance to worse individuals, could find a global maximum. The advantage of a tournament size of 100 is visible across the entire chart width.
+
+\section{Comparison with non-evolutionary method}
+\begin{center}
+	\includegraphics[scale=0.5]{greedy}
+\end{center}
+
+An example of a non-evolutionary solution to the knapsack problem can be a greedy algorithm that selects the most valuable items until the total weight and size of the items do not exceed the maximum values.
 
 \end{document}
