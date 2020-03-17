@@ -3,6 +3,10 @@ from math import floor
 import matplotlib.pyplot as plt
 import numpy as np
 
+N_GLOB = 1001
+W_GLOB = 10001
+S_GLOB = 10001
+
 
 class Population:
     def __init__(self, indivs=None):
@@ -109,7 +113,6 @@ def mutate(genes, rate):
     to_mutate = np.random.randint(genes_num, size=to_mutate_num)
     for gene_idx in to_mutate:
         genes[gene_idx] = int(not genes[gene_idx])
-    return genes
 
 
 def tournament(population, tourn_size):
@@ -134,7 +137,7 @@ def knapsack(task, POP_SIZE=1000, TOURN_SIZE=200, CROSS_RATE=0.5, MUT_RATE=0.001
     i = 1
     while i < ITERATIONS:
         pop.calc_fitness(task)
-        best, best_fit = pop.best()
+        _, best_fit = pop.best()
         scores_per_gen.append(best_fit)
         print('Generation:', i, ', fitness:', best_fit)
 
@@ -144,7 +147,7 @@ def knapsack(task, POP_SIZE=1000, TOURN_SIZE=200, CROSS_RATE=0.5, MUT_RATE=0.001
             parent1 = tournament(pop, TOURN_SIZE)
             parent2 = tournament(pop, TOURN_SIZE)
             child = crossover(parent1, parent2, CROSS_RATE)
-            child = mutate(child, MUT_RATE)
+            mutate(child, MUT_RATE)
             new_pop.append(child)
             j += 1
         pop = Population(new_pop)
@@ -162,7 +165,6 @@ def greedySearch(task):
     values_sorted = sorted(items, key=lambda x: x[0], reverse=True)
     w_sum = c_sum = s_sum = 0
     for item in values_sorted:
-        print(item)
         if w_sum > task.w or s_sum > task.s:
             break
         c_sum += item[1]
@@ -175,154 +177,137 @@ def evol_vs_nonevol(tests_num, nonevol, **evol_kwargs):
     nonevol_fit = 0
     evol_fit = 0
     for i in range(tests_num):
-        generate_task(1001, 10001, 10001, 'task.csv')
+        generate_task(N_GLOB, W_GLOB, S_GLOB, 'task.csv')
         task = read_task('task.csv')
         nonevol_fit += nonevol(task) // tests_num
         evol_fit += knapsack(task, **evol_kwargs)[1][-1] // tests_num
 
     print("Greedy fitness:", nonevol_fit)
     print("Genetic fitness:", evol_fit)
-    plt.bar(['Greedy Search', 'Genetic Algorithm'], [nonevol_fit, evol_fit])
+    plt.bar(['Greedy Algorithm', 'Genetic Algorithm'], [nonevol_fit, evol_fit])
     plt.ylabel("Fitness")
     plt.show()
 
 
 def crossoverTest(tests_num, cross_rates, iterations, **kwargs):
     print("Analysis of the crossover probability:")
-    best_fit_arr = [0 for _ in range(len(cross_rates))]
-    progress_fit_arr = [0 for _ in range(len(cross_rates))]
-    domain = [x for x in range(1, iterations + 1)]
-    fig, axs = plt.subplots(2, 1, gridspec_kw={'height_ratios': [2, 1]}, figsize=[10, 10])
-    fig.suptitle('The impact of the crossover probability on the results')
+    fit_arr = [0 for _ in range(len(cross_rates))]
     for test_num in range(tests_num):
-        generate_task(1001, 10001, 10001, 'task.csv')
+        generate_task(N_GLOB, W_GLOB, S_GLOB, 'task.csv')
         task = read_task('task.csv')
         i = 0
         for cross_rate in cross_rates:
-            genes, fitness = knapsack(task, CROSS_RATE=cross_rate, ITERATIONS=iterations, **kwargs)
-            best_fit_arr[i] += fitness[-1] // tests_num
-            progress_fit_arr[i] += fitness // tests_num
+            _, fitness = knapsack(task, CROSS_RATE=cross_rate, ITERATIONS=iterations, **kwargs)
+            fit_arr[i] += fitness // tests_num
             if test_num == tests_num - 1:
-                axs[0].plot(domain, progress_fit_arr[i], label=str(cross_rates[i]))
+                plt.plot([x for x in range(1, iterations + 1)], fit_arr[i], label=str(cross_rates[i]))
             i += 1
 
-    axs[0].set_xlabel('Generation')
-    axs[0].set_ylabel('Fitness')
-    axs[0].legend()
-
-    axs[1].set_xlabel('Crossover probability')
-    axs[1].set_ylabel('Final fitness')
-    xaxis = [str(x) for x in cross_rates]
-    for i in range(tests_num):
-        axs[1].bar(xaxis, best_fit_arr, width=0.1)
+    plt.xlabel('Generation')
+    plt.ylabel('Fitness')
+    plt.legend()
     # plt.show()
     plt.savefig('crossover.png')
 
 
 def mutationTest(tests_num, mut_rates, iterations, **kwargs):
     print("Analysis of the mutation probability:")
-    best_fit_arr = [0 for _ in range(len(mut_rates))]
-    progress_fit_arr = [0 for _ in range(len(mut_rates))]
-    domain = [x for x in range(1, iterations + 1)]
-    fig, axs = plt.subplots(2, 1, gridspec_kw={'height_ratios': [2, 1]}, figsize=[10, 10])
-    fig.suptitle('The impact of the mutation probability on the results')
+    fit_arr = [0 for _ in range(len(mut_rates))]
     for test_num in range(tests_num):
-        generate_task(1001, 10001, 10001, 'task.csv')
+        generate_task(N_GLOB, W_GLOB, S_GLOB, 'task.csv')
         task = read_task('task.csv')
         i = 0
         for mut_rate in mut_rates:
-            genes, fitness = knapsack(task, MUT_RATE=mut_rate, ITERATIONS=iterations, **kwargs)
-            best_fit_arr[i] += fitness[-1] // tests_num
-            progress_fit_arr[i] += fitness // tests_num
+            _, fitness = knapsack(task, MUT_RATE=mut_rate, ITERATIONS=iterations, **kwargs)
+            fit_arr[i] += fitness // tests_num
             if test_num == tests_num - 1:
-                axs[0].plot(domain, progress_fit_arr[i], label=str(mut_rates[i]))
+                plt.plot([x for x in range(1, iterations + 1)], fit_arr[i], label=str(mut_rates[i]))
             i += 1
 
-    axs[0].set_xlabel('Generation')
-    axs[0].set_ylabel('Fitness')
-    axs[0].legend()
-
-    axs[1].set_xlabel('Mutation probability')
-    axs[1].set_ylabel('Final fitness')
-    xaxis = [str(x) for x in mut_rates]
-    for i in range(tests_num):
-        axs[1].bar(xaxis, best_fit_arr, width=0.1)
+    plt.xlabel('Generation')
+    plt.ylabel('Fitness')
+    plt.legend()
     # plt.show()
     plt.savefig('mutation.png')
 
 
 def tournamentTest(tests_num, tourn_sizes, iterations, **kwargs):
     print("Analysis of the tournament size:")
-    best_fit_arr = [0 for _ in range(len(tourn_sizes))]
-    progress_fit_arr = [0 for _ in range(len(tourn_sizes))]
-    domain = [x for x in range(1, iterations + 1)]
-    fig, axs = plt.subplots(2, 1, gridspec_kw={'height_ratios': [2, 1]}, figsize=[10, 10])
-    fig.suptitle('The impact of the tournament size on the results')
+    fit_arr = [0 for _ in range(len(tourn_sizes))]
     for test_num in range(tests_num):
-        generate_task(1001, 10001, 10001, 'task.csv')
+        generate_task(N_GLOB, W_GLOB, S_GLOB, 'task.csv')
         task = read_task('task.csv')
         i = 0
         for tourn_size in tourn_sizes:
-            genes, fitness = knapsack(task, TOURN_SIZE=tourn_size, ITERATIONS=iterations, **kwargs)
-            best_fit_arr[i] += fitness[-1] // tests_num
-            progress_fit_arr[i] += fitness // tests_num
+            _, fitness = knapsack(task, TOURN_SIZE=tourn_size, ITERATIONS=iterations, **kwargs)
+            fit_arr[i] += fitness // tests_num
             if test_num == tests_num - 1:
-                axs[0].plot(domain, progress_fit_arr[i], label=str(tourn_sizes[i]))
+                plt.plot([x for x in range(1, iterations + 1)], fit_arr[i], label=str(tourn_sizes[i]))
             i += 1
 
-    axs[0].set_xlabel('Generation')
-    axs[0].set_ylabel('Fitness')
-    axs[0].legend()
-
-    axs[1].set_xlabel('Tournament size')
-    axs[1].set_ylabel('Final fitness')
-    xaxis = [str(x) for x in tourn_sizes]
-    for i in range(tests_num):
-        axs[1].bar(xaxis, best_fit_arr, width=0.1)
+    plt.xlabel('Generation')
+    plt.ylabel('Fitness')
+    plt.legend()
+    # plt.show()
     plt.savefig('tournament.png')
 
 
 def populationTest(tests_num, pop_sizes, iterations, **kwargs):
     print("Analysis of the population size:")
-    best_fit_arr = [0 for _ in range(len(pop_sizes))]
-    progress_fit_arr = [0 for _ in range(len(pop_sizes))]
-    domain = [x for x in range(1, iterations + 1)]
-    fig, axs = plt.subplots(2, 1, gridspec_kw={'height_ratios': [2, 1]}, figsize=[10, 10])
-    fig.suptitle('The impact of the population size on the results')
+    fit_arr = [0 for _ in range(len(pop_sizes))]
     for test_num in range(tests_num):
-        generate_task(1001, 10001, 10001, 'task.csv')
+        generate_task(N_GLOB, W_GLOB, S_GLOB, 'task.csv')
         task = read_task('task.csv')
         i = 0
         for pop_size in pop_sizes:
-            genes, fitness = knapsack(task, POP_SIZE=pop_size, ITERATIONS=iterations, **kwargs)
-            best_fit_arr[i] += fitness[-1] // tests_num
-            progress_fit_arr[i] += fitness // tests_num
+            _, fitness = knapsack(task, POP_SIZE=pop_size, ITERATIONS=iterations, **kwargs)
+            fit_arr[i] += fitness // tests_num
             if test_num == tests_num - 1:
-                axs[0].plot(domain, progress_fit_arr[i], label=str(pop_sizes[i]))
+                plt.plot([x for x in range(1, iterations + 1)], fit_arr[i], label=str(pop_sizes[i]))
             i += 1
 
-    axs[0].set_xlabel('Generation')
-    axs[0].set_ylabel('Fitness')
-    axs[0].legend()
-
-    axs[1].set_xlabel('Population size')
-    axs[1].set_ylabel('Final fitness')
-    xaxis = [str(x) for x in pop_sizes]
-    for i in range(tests_num):
-        axs[1].bar(xaxis, best_fit_arr, width=0.1)
+    plt.xlabel('Generation')
+    plt.ylabel('Fitness')
+    plt.legend()
     # plt.show()
     plt.savefig('population.png')
 
 
+def best_vs_worst(tests_num, best, worst, iterations):
+    print("Comparing the best with the worst parameters:")
+    fit_arr = [0, 0]
+    for test_num in range(tests_num):
+        generate_task(N_GLOB, W_GLOB, S_GLOB, 'task.csv')
+        task = read_task('task.csv')
+        _, fitness_best = knapsack(task, *best, ITERATIONS=iterations)
+        _, fitness_worst = knapsack(task, *worst, ITERATIONS=iterations)
+        fit_arr[0] += fitness_best // tests_num
+        fit_arr[1] += fitness_worst // tests_num
+
+    plt.plot([x for x in range(1, iterations + 1)], fit_arr[0], label='The best')
+    plt.plot([x for x in range(1, iterations + 1)], fit_arr[1], label='The worst')
+    plt.xlabel('Generation')
+    plt.ylabel('Fitness')
+    plt.legend()
+
+    # plt.show()
+    plt.savefig('best_vs_worst.png')
+
+
 if __name__ == '__main__':
-    crossoverTest(tests_num=5, cross_rates=[0.9, 0.5, 0.1], iterations=600)
-    print('Crossover test finished')
-    mutationTest(tests_num=5, mut_rates=[0.01, 0.005, 0.001], iterations=600)
-    print('Mutation test finished')
-    tournamentTest(tests_num=5, tourn_sizes=[100, 500, 900], iterations=600)
-    print('Tournament test finished')
-    populationTest(tests_num=5, pop_sizes=[1000, 3500, 6000], iterations=600)
-    print('Population test finished')
-    # the best: pop_size=6000, tourn=100, cross=0.9, mut_rate=0.001
-    evol_vs_nonevol(1, greedySearch, POP_SIZE=6000, TOURN_SIZE=100, CROSS_RATE=0.9, MUT_RATE=0.001, ITERATIONS=800)
+    # crossoverTest(tests_num=5, cross_rates=[0.9, 0.5, 0.1], POP_SIZE=100,iterations=600)
+    # print('Crossover test finished')
+    # mutationTest(tests_num=1, mut_rates=[0.01, 0.005, 0.001], iterations=10)
+    # print('Mutation test finished')
+    # tournamentTest(tests_num=5, tourn_sizes=[100, 500, 900], iterations=600)
+    # print('Tournament test finished')
+    # populationTest(tests_num=1, pop_sizes=[100, 1000, 3000], iterations=1000)
+    # print('Population test finished')
+    # the best : pop_size=6000, tourn=100, cross=0.9, mut_rate=0.001
+    thebest = [3000, 100, 0.9, 0.001]
+    # the worst: pop_size=6000, tourn=100, cross=0.9, mut_rate=0.001
+    theworst = [100, 90, 0.1, 0.01]
+
+    # evol_vs_nonevol(5, greedySearch, POP_SIZE=6000, TOURN_SIZE=100, CROSS_RATE=0.9, MUT_RATE=0.001, ITERATIONS=800)
+    best_vs_worst(1, thebest, theworst, iterations=100)
     print('nonevol vs evol comparison finished')

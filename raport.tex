@@ -117,10 +117,11 @@ In the beginning a real number from the range [0, 1] is drawn. If that number is
 	\includegraphics[scale=0.5]{mutate}
 \end{center}
 
-The function selects random genes from an individual and converts their values to the opposite, then returns the mutated individual.
+The function selects random genes from an individual and converts their values to the opposite. Modification is done in place, so there is not need to return anything.
 
 \subsection{Knapsack Function}
 \begin{center}
+	\hspace*{-1.5cm}
 	\includegraphics[scale=0.5]{knapsack}
 \end{center}
 
@@ -144,10 +145,10 @@ The following default parameters were used:
 Despite the weak beginning (due to the small number of genes to mutate), the best fitness values were obtained for the mutation coefficient equal 0.001. It should also be noted here the smoothness of the lines on the graph, which indicates the stability provided by this parameter. The worst option turned out to be the coefficient equal 0.01, which due to a large number of genes to change led to a large number of overshoots, which resulted not only in oscillating far below the values obtained by the other parameters, but also could not stabilize to the form of a line.
 
 \subsection{The impact of the population size}
-\hspace*{-1.5cm}
-\includegraphics[scale=0.55]{population2}
+\hspace*{-1.0cm}
+\includegraphics[scale=0.95]{population}
 
-The values obtained for population sizes 3500 and 6000 are almost identical, therefore, we can conclude that after exceeding a certain number, further increase of the population size is not justified. The chart shows that the line for 1000 individuals was left behind its opponents, however, at the end of the test, it was very close to the values obtained by the better parameters. One should also take into account its short execution time. However, the goal was to find the best arrangement of items that can be put into the knapsack, so the best option is population size equal to 6000.
+The difference in values obtained for parameters 1000 and 3000 is so small that we can conclude that a further increase in the population size is not justified. The graph shows that the larger the population size, the more combinations can be checked, which is why the increase in value at the beginning is faster, but at the end of the test the parameter 1000 almost equaled the winner. Its shorter execution time should also be taken into account. The test for parameter 100 was the shortest, but its poor result rejects it on the spot. Since the goal was to find the best arrangement of items that can be put in a knapsack, the best option is a population size of 3000.
 
 \subsection{The impact of the crossover probability}
 \hspace*{-1.5cm}
