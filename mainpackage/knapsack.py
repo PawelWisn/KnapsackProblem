@@ -186,7 +186,8 @@ def evol_vs_nonevol(tests_num, nonevol, **evol_kwargs):
     print("Genetic fitness:", evol_fit)
     plt.bar(['Greedy Algorithm', 'Genetic Algorithm'], [nonevol_fit, evol_fit])
     plt.ylabel("Fitness")
-    plt.show()
+    # plt.show()
+    plt.savefig('evol_vs_nonevol.png')
 
 
 def crossoverTest(tests_num, cross_rates, iterations, **kwargs):
@@ -303,11 +304,9 @@ if __name__ == '__main__':
     # print('Tournament test finished')
     # populationTest(tests_num=1, pop_sizes=[100, 1000, 3000], iterations=1000)
     # print('Population test finished')
-    # the best : pop_size=6000, tourn=100, cross=0.9, mut_rate=0.001
+    # evol_vs_nonevol(1, greedySearch, POP_SIZE=100, TOURN_SIZE=10, CROSS_RATE=0.9, MUT_RATE=0.001, ITERATIONS=800)
+    # print('nonevol vs evol comparison finished')
     thebest = [3000, 100, 0.9, 0.001]
-    # the worst: pop_size=6000, tourn=100, cross=0.9, mut_rate=0.001
-    theworst = [100, 90, 0.1, 0.01]
-
-    # evol_vs_nonevol(5, greedySearch, POP_SIZE=6000, TOURN_SIZE=100, CROSS_RATE=0.9, MUT_RATE=0.001, ITERATIONS=800)
-    best_vs_worst(1, thebest, theworst, iterations=100)
-    print('nonevol vs evol comparison finished')
+    theworst = [100, 90, 0.1, 0.005]
+    best_vs_worst(1, thebest, theworst, iterations=1000)
+    print('the best vs the worst comparison finished')

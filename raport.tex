@@ -162,6 +162,10 @@ The best value of the parameter turned out to be 0.9, however, the impact of thi
 
 Experience has shown a large impact of the tournament size on the final result. Too large sizes blocked the population at the local maximums, which is why the results obtained are far from satisfactory. Meanwhile, the smallest parameter, by giving the chance to worse individuals, could find a global maximum. The advantage of a tournament size of 100 is visible across the entire chart width.
 
+\subsection{Comparison of the best parameters with the worst}
+\hspace*{-1.5cm}
+\includegraphics[scale=0.55]{tournament}
+
 \section{Comparison with non-evolutionary method}
 \begin{center}
 	\includegraphics[scale=0.5]{greedy}
@@ -169,7 +173,7 @@ Experience has shown a large impact of the tournament size on the final result. 
 
 An example of a non-evolutionary solution to a knapsack problem can be a greedy algorithm that selects items with the highest ratio of value to the sum of weight and size, until the total weight and size of the items do not exceed the maximum values.
 
-\includegraphics[scale=0.55]{greedy_vs_genetic}
+\includegraphics[scale=0.7]{evol_vs_nonevol}
 
-The greedy algorithm turned out to be more effective than I expected. It achieved results close to those obtained by the genetic algorithm. The function is performed almost immediately, which can not be said about the evolutionary method, which performs much more calculations. However, since the goal of the task was to maximize the value of items in the backpack, the victory must be granted to the genetic algorithm.
+The greedy algorithm turned out to be better than the genetic one. This may be due to the low level of complexity of the knapsack problem. The greedy algorithm also has an advantage in terms of execution time, because it is executed almost immediately. The genetic algorithm performs a huge number of calculations that take time. It seems that this task is not the best place to apply genetic algorithms. 
 \end{document}
