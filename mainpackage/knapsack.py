@@ -290,23 +290,22 @@ def best_vs_worst(tests_num, best, worst, iterations):
     plt.xlabel('Generation')
     plt.ylabel('Fitness')
     plt.legend()
-
     # plt.show()
     plt.savefig('best_vs_worst.png')
 
 
 if __name__ == '__main__':
-    # crossoverTest(tests_num=5, cross_rates=[0.9, 0.5, 0.1], POP_SIZE=100,iterations=600)
-    # print('Crossover test finished')
-    # mutationTest(tests_num=1, mut_rates=[0.01, 0.005, 0.001], iterations=10)
-    # print('Mutation test finished')
-    # tournamentTest(tests_num=5, tourn_sizes=[100, 500, 900], iterations=600)
-    # print('Tournament test finished')
-    # populationTest(tests_num=1, pop_sizes=[100, 1000, 3000], iterations=1000)
-    # print('Population test finished')
-    # evol_vs_nonevol(1, greedySearch, POP_SIZE=100, TOURN_SIZE=10, CROSS_RATE=0.9, MUT_RATE=0.001, ITERATIONS=800)
-    # print('nonevol vs evol comparison finished')
+    crossoverTest(tests_num=5, cross_rates=[0.9, 0.5, 0.1], POP_SIZE=100, iterations=600)
+    print('Crossover test finished')
+    mutationTest(tests_num=5, mut_rates=[0.01, 0.005, 0.001], iterations=600)
+    print('Mutation test finished')
+    tournamentTest(tests_num=5, tourn_sizes=[100, 500, 900], iterations=600)
+    print('Tournament test finished')
+    populationTest(tests_num=5, pop_sizes=[100, 1000, 3000], iterations=1000)
+    print('Population test finished')
+    evol_vs_nonevol(5, greedySearch, POP_SIZE=100, TOURN_SIZE=10, CROSS_RATE=0.9, MUT_RATE=0.001, ITERATIONS=800)
+    print('nonevol vs evol comparison finished')
     thebest = [3000, 100, 0.9, 0.001]
-    theworst = [100, 90, 0.1, 0.005]
-    best_vs_worst(1, thebest, theworst, iterations=1000)
+    theworst = [100, 90, 0.1, 0.01]
+    best_vs_worst(5, thebest, theworst, iterations=1000)
     print('the best vs the worst comparison finished')
